@@ -1,5 +1,22 @@
 {
+    "name": "Want100Cookies/XeduleToArray",
+    "description": "Get any information from the roosters.xedule.nl",
+    "license": "MIT",
+    "keywords": ["xedule"],
+    "authors": [
+        {
+            "name": "Pascal Drewes",
+            "email": "pascal@drewes-webdesign.nl"
+        }
+    ],
     "require": {
-        "sunra/php-simple-html-dom-parser": "^1.5"
+        "sunra/php-simple-html-dom-parser": "^1.5",
+        "nesbot/carbon": "^1.21"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Want100Cookies\\XeduleToArray\\": "src"
+        }
     }
 }
