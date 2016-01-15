@@ -9,11 +9,11 @@ use Carbon\Carbon;
 */
 class XeduleToArray
 {
-	const BASE_URL = 'https://roosters.xedule.nl';
+	private $baseUrl;
 	
-	public function __construct()
+	public function __construct($baseUrl = 'https://roosters.xedule.nl')
 	{
-		# code...
+		$this->baseUrl = $baseUrl;
 	}
 
 	private function getStringFromWebsite($url)
@@ -56,32 +56,25 @@ class XeduleToArray
 	}
 
 	// Get the organisation ID 
-	public function getOrgID($orgName, $baseUrl)
+	public function getOrgID($orgName)
 	{
-		$dom = $this->getDOM($baseUrl);
+		$allOrgs = $this->getAllOrgs();
 
-		if ($dom->find('.organisatieContainer')) // If the website contains the class organisatieContainer
-		{
-			$orgs = $dom->find('.organisatie a'); // Find every link where the parent has the class organisatie
-
-			foreach ($orgs as $key => $org)
-			{
-				if ($org->innerText() != $orgName) // Check if this is the organisation we are searching for
-					continue;
-
-				$path = parse_url($org->href, PHP_URL_PATH); // Only interested in the path
-				$pathParts = explode('/', $path);
-				$code = $pathParts[count($pathParts) - 1]; // Only interested in the last part
-				return $code;
-			}
+		if ($allOrgs == null || count($allOrgs) == 0) {
+			return null;
 		}
 
-		return null;
+		foreach ($allOrgs as $org) {
+			if ($org['name'] == $orgName)
+				return $org['id'];
+		}
+
+		return;
 	}
 
-	public function getAllOrgs($baseUrl)
+	public function getAllOrgs()
 	{
-		$dom = $this->getDOM($baseUrl);
+		$dom = $this->getDOM($this->baseUrl);
 
 		if ($dom->find('.organisatieContainer'))
 		{
@@ -107,32 +100,25 @@ class XeduleToArray
 	}
 
 	// Get the location ID
-	public function getLocationID($locationName, $orgId, $baseUrl)
+	public function getLocationID($locationName, $orgId)
 	{
-		$dom = $this->getDom($baseUrl . '/Organisatie/OrganisatorischeEenheid/' . $orgId);
+		$allLocations = $this->getAllLocations();
 
-		if ($dom->find('.organisatieContainer')) // If the website contains the class organisatieContainer
-		{
-			$locations = $dom->find('.organisatie a'); // Find every link where the parent has the class organisatie
-
-			foreach ($locations as $key => $location)
-			{
-				if ($location->innerText() !== $locationName) // Check if the location is the one we are searching for
-					continue;
-
-				$path = parse_url($location->href, PHP_URL_PATH); // Only interested in the path
-				$pathParts = explode('/', $path);
-				$code = $pathParts[count($pathParts) - 1]; // Only interested in the last part
-				return $code;	
-			}
+		if ($allLocations == null || count($allLocations) == 0) {
+			return null;
 		}
 
-		return null;
+		foreach ($allLocations as $location) {
+			if ($location['name'] == $locationName)
+				return $location['id'];
+		}
+
+		return;
 	}
 
-	public function getAllLocations($orgId, $baseUrl)
+	public function getAllLocations($orgId)
 	{
-		$dom = $this->getDom($baseUrl . '/Organisatie/OrganisatorischeEenheid/' . $orgId);
+		$dom = $this->getDom($this->baseUrl . '/Organisatie/OrganisatorischeEenheid/' . $orgId);
 
 		if ($dom->find('.organisatieContainer')) // If the website contains the class organisatieContainer
 		{
@@ -159,37 +145,25 @@ class XeduleToArray
 	}
 
 	// Get the id of the group
-	function getGroupID($groupName, $locationId, $baseUrl)
+	function getGroupID($groupName, $locationId)
 	{
-		$dom = $this->getDom($baseUrl . '/OrganisatorischeEenheid/Attendees/' . $locationId);
+		$allGroups = $this->getAllGroups();
 
-		$types = $dom->find('.AttendeeTypeBlock');
-
-		foreach ($types as $key => $type)
-		{
-			if ($type->first_child()->innerText() !== 'Studentgroep') // Only for students
-				continue;
-			
-			$groups = $type->find('a'); // Every link under students type is a group
-
-			foreach ($groups as $key => $group)
-			{
-				if ($group->innerText() !== $groupName) // Check if the group is the one we are searching for
-					continue;
-
-				$path = parse_url($group->href, PHP_URL_PATH);
-				$pathParts = explode('/', $path);
-				$code = $pathParts[count($pathParts) - 1]; // Only interested in the last part
-				return $code;
-			}
+		if ($allGroups == null || count($allGroups) == 0) {
+			return null;
 		}
 
-		return null;
+		foreach ($allGroups as $group) {
+			if ($group['name'] == $groupName)
+				return $group['id'];
+		}
+
+		return;
 	}
 
-	public function getAllGroups($locationId, $baseUrl)
+	public function getAllGroups($locationId)
 	{
-		$dom = $this->getDom($baseUrl . '/OrganisatorischeEenheid/Attendees/' . $locationId);
+		$dom = $this->getDom($this->baseUrl . '/OrganisatorischeEenheid/Attendees/' . $locationId);
 
 		$types = $dom->find('.AttendeeTypeBlock');
 
@@ -221,9 +195,9 @@ class XeduleToArray
 	}
 
 	// Get the schedule for the group and pars it to an array
-	function getGroupSchedule($groupId, $week, $year, $baseUrl)
+	function getGroupSchedule($groupId, $week, $year)
 	{
-		$url = $baseUrl . '/Calendar/iCalendarICS/' . $groupId . '?week=' . $week . '&year=' . $year;
+		$url = $this->baseUrl . '/Calendar/iCalendarICS/' . $groupId . '?week=' . $week . '&year=' . $year;
 
 		$icsFile = $this->getStringFromWebsite($url);
 
