@@ -79,6 +79,33 @@ class XeduleToArray
 		return null;
 	}
 
+	public function getAllOrgs($baseUrl)
+	{
+		$dom = $this->getDOM($baseUrl);
+
+		if ($dom->find('.organisatieContainer'))
+		{
+			$orgElements = $dom->find('.organisatie a');
+
+			$orgs = array();
+
+			foreach ($orgElements as $element) {
+				$path = parse_url($element->href, PHP_URL_PATH); // Only interested in the path
+				$pathParts = explode('/', $path);
+				$code = $pathParts[count($pathParts) - 1]; // Only interested in the last part
+
+				$orgs[] = array(
+					'id' => $code,
+					'name' => $element->innerText()
+				);
+			}
+
+			return $orgs;
+		}
+
+		return null;
+	}
+
 	// Get the location ID
 	public function getLocationID($locationName, $orgId, $baseUrl)
 	{
@@ -98,6 +125,34 @@ class XeduleToArray
 				$code = $pathParts[count($pathParts) - 1]; // Only interested in the last part
 				return $code;	
 			}
+		}
+
+		return null;
+	}
+
+	public function getAllLocations($orgId, $baseUrl)
+	{
+		$dom = $this->getDom($baseUrl . '/Organisatie/OrganisatorischeEenheid/' . $orgId);
+
+		if ($dom->find('.organisatieContainer')) // If the website contains the class organisatieContainer
+		{
+			$locationElements = $dom->find('.organisatie a'); // Find every link where the parent has the class organisatie
+
+			$locations = array();
+
+			foreach ($locationElements as $element)
+			{
+				$path = parse_url($element->href, PHP_URL_PATH); // Only interested in the path
+				$pathParts = explode('/', $path);
+				$code = $pathParts[count($pathParts) - 1]; // Only interested in the last part
+				
+				$locations[] = array(
+					'id' => $code,
+					'name' => $element->innerText()
+				);
+			}
+
+			return $locations;
 		}
 
 		return null;
@@ -127,6 +182,39 @@ class XeduleToArray
 				$code = $pathParts[count($pathParts) - 1]; // Only interested in the last part
 				return $code;
 			}
+		}
+
+		return null;
+	}
+
+	public function getAllGroups($locationId, $baseUrl)
+	{
+		$dom = $this->getDom($baseUrl . '/OrganisatorischeEenheid/Attendees/' . $locationId);
+
+		$types = $dom->find('.AttendeeTypeBlock');
+
+		foreach ($types as $key => $type)
+		{
+			if ($type->first_child()->innerText() !== 'Studentgroep') // Only for students
+				continue;
+			
+			$groupElements = $type->find('a'); // Every link under students type is a group
+
+			$groups = array();
+
+			foreach ($groupElements as $element)
+			{
+				$path = parse_url($element->href, PHP_URL_PATH);
+				$pathParts = explode('/', $path);
+				$code = $pathParts[count($pathParts) - 1]; // Only interested in the last part
+				
+				$groups[] = array(
+					'id' => $code,
+					'name' => $element->innerText()
+				);
+			}
+
+			return $groups;
 		}
 
 		return null;
