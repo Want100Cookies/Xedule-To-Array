@@ -16,7 +16,7 @@
     "require-dev": {},
     "autoload": {
         "psr-4": {
-            "Want100Cookies\\XeduleToArray\\XeduleToArray": "src"
+            "Want100Cookies\\XeduleToArray\\XeduleToArray\\": "src"
         }
     }
 }
