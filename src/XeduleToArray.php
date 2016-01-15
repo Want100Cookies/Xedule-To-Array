@@ -1,5 +1,5 @@
 <?php
-namespace Want100Cookies\XeduleToArray;
+namespace XeduleToArray;
 
 use Sunra\PhpSimple\HtmlDomParser;
 use Carbon\Carbon;
