@@ -1,3 +1,6 @@
+# DEPRECATED
+This project is deprecated because Xedule has decided to close down it's API
+
 # Xedule-To-Array
 Convert any schedule from roosters.xedule.nl to an array
 
